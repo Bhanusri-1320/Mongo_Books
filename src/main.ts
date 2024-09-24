@@ -5,14 +5,13 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = new DocumentBuilder()
-    .setTitle('API Documentation')
-    .setDescription('API description for my application')
-    .setVersion('1.0')
-    .addTag('example') // Optional: Add tags for organization
+    .setTitle(process.env.SWGGER_TITLE)
+    .setDescription(process.env.SWAGGER_DESCRIPTION)
+    .setVersion(process.env.SWAGGER_VERSION)
+    .addTag(process.env.SWAGGER_TAG)
     .build();
-
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document); // Set up Swagger UI at /api
+  SwaggerModule.setup('api', app, document);
   await app.listen(3000);
 }
 bootstrap();
