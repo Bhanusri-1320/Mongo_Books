@@ -8,6 +8,8 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { AutoMap } from '@automapper/classes';
+import { User } from 'src/auth/schemas/user.schema';
 
 export class createBookDto {
   @ApiProperty()
@@ -15,29 +17,35 @@ export class createBookDto {
   @IsNotEmpty()
   @MaxLength(30)
   @IsString()
+  @AutoMap()
   readonly title: string;
   @ApiProperty()
   @MinLength(3)
   @IsNotEmpty()
   @MaxLength(30)
   @IsString()
+  @AutoMap()
   readonly description: string;
   @ApiProperty()
   @MinLength(3)
   @IsNotEmpty()
   @MaxLength(30)
   @IsString()
+  @AutoMap()
   readonly author: string;
   @ApiProperty()
-  @MinLength(3)
   @IsNotEmpty()
-  @MaxLength(30)
   @IsNumber()
+  @AutoMap()
   readonly price: number;
   @ApiProperty()
   @MinLength(3)
   @IsNotEmpty()
   @MaxLength(30)
   @IsString()
+  @AutoMap()
   readonly category: Category;
+
+  @AutoMap()
+  user: User;
 }

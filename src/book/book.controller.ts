@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import {
   Body,
   Controller,
@@ -9,39 +10,98 @@ import {
   Post,
   Put,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { BookService } from './book.service';
 import { Book } from './schemas/book.schema';
 import { createBookDto } from './dto/create-book.dto';
 import { updateBookDto } from './dto/update-book.dto';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Response } from 'express';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { Cron, CronExpression, Interval, Timeout } from '@nestjs/schedule';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import { SchedulerRegistry } from '@nestjs/schedule';
+import { AuthGuard } from '@nestjs/passport';
+import { GetUser } from 'src/auth/get-user.desorator';
+import { User } from 'src/auth/schemas/user.schema';
+
 @ApiTags('book')
+@UseGuards(AuthGuard('jwt'))
 @Controller('book')
 export class BookController {
-  constructor(private bookService: BookService) {}
+  constructor(
+    private bookService: BookService,
+    private schedulerRegistry: SchedulerRegistry,
+  ) {}
   private readonly logger = new Logger(BookService.name);
-  @Cron(CronExpression.EVERY_10_SECONDS)
-  handleCron() {
-    this.logger.debug('Called every 10 seconds');
+
+  @Post('add-job')
+  addJob(@Body('name') name: string, @Body('seconds') seconds: string) {
+    this.bookService.addCronJob(name, seconds);
+    return { message: `Job ${name} added successfully!` };
   }
-  @Timeout(5000)
-  handleTimeout() {
-    this.logger.debug('Called once after 5 seconds');
+  // @Post('add-job')
+  // addJob(@Body('name') name: string, @Body('seconds') seconds: string) {
+  //   this.bookService.addCronJob(name, seconds);
+  //   return { message: `Job ${name} added successfully!` };
+  // }
+
+  @Delete('/cron/:name')
+  deleteCron(@Param('name') name: string) {
+    this.bookService.deleteCron(name);
+    return { message: `Job ${name} deleted successfully!` };
   }
-  @Interval(5000) // Executes every 5 seconds
-  handleInterval() {
-    console.log('Interval job running every 5 seconds');
+  @Get('job')
+  getCrons() {
+    return this.bookService.getCrons();
+  }
+
+  @Post('add-Interval')
+  addInterval(
+    @Body('name') name: string,
+    @Body('milliseconds') milliseconds: number,
+  ) {
+    console.log(name, milliseconds);
+    this.bookService.addInterval(name, milliseconds);
+    return { message: `${name} created with ${milliseconds / 1000} seconds` };
+  }
+
+  @Delete('/interval/:name')
+  deleteInterval(@Param('name') name: string) {
+    this.bookService.deleteInterval(name);
+  }
+  @Get('get-Interval')
+  getIntervals() {
+    this.bookService.getIntervals();
+  }
+
+  @Post('add-Timeout')
+  addTimeout(
+    @Body('name') name: string,
+    @Body('milliseconds') milliseconds: number,
+  ) {
+    this.bookService.addTimeout(name, milliseconds);
+  }
+
+  @Delete('/timeout/:name')
+  deleteTimeout(@Param('name') name: string) {
+    this.bookService.deleteTimeout(name);
+  }
+  @Get('/timeout')
+  getTimeout() {
+    this.bookService.getTimeout();
   }
 
   @Get()
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all books' })
   @ApiResponse({ status: 200, description: 'Book found' })
   @ApiResponse({ status: 404, description: 'Book not found' })
-  async findAll(): Promise<Book[]> {
-    return await this.bookService.findAll();
+  async findAll(@GetUser() user: User): Promise<Book[]> {
+    return await this.bookService.findAll(user);
   }
 
   @Get('download/:id')
@@ -70,9 +130,9 @@ export class BookController {
 
   @Get('download')
   @ApiOperation({ summary: 'Download All books in PDF Format' })
-  async generateAllBooksPDF(@Res() res: Response) {
+  async generateAllBooksPDF(@Res() res: Response, @GetUser() user: User) {
     try {
-      const books = await this.bookService.findAll();
+      const books = await this.bookService.findAll(user);
       console.log('Books retrieved for PDF:', books);
       if (!books.length) {
         return res.status(404).send('No books found.');
@@ -93,14 +153,19 @@ export class BookController {
   }
 
   @Post()
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'create book' })
   @ApiResponse({ status: 200, description: 'Book create' })
   @ApiResponse({ status: 404, description: 'unable to create' })
-  async createBook(@Body() book: createBookDto): Promise<Book> {
-    return this.bookService.createBook(book);
+  async createBook(
+    @Body() createBookDto: createBookDto,
+    @GetUser() user: User,
+  ): Promise<Book> {
+    return this.bookService.createBook(createBookDto, user);
   }
 
   @Get(':id')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get book by id' })
   @ApiResponse({ status: 200, description: 'Book found' })
   @ApiResponse({ status: 404, description: 'Book not found' })
@@ -108,6 +173,7 @@ export class BookController {
     return this.bookService.getBookById(id);
   }
   @Delete(':id')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'delete book by id' })
   @ApiResponse({ status: 200, description: 'Book deleted' })
   @ApiResponse({ status: 404, description: 'Book not found' })
@@ -116,14 +182,15 @@ export class BookController {
     return await this.bookService.deleteBook(id);
   }
   @Put(':id')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'update book by id' })
   @ApiResponse({ status: 200, description: 'Book found' })
   @ApiResponse({ status: 404, description: 'Book not found' })
   async updateBookbyId(
     @Param('id')
     id: string,
-    @Body() book: updateBookDto,
+    @Body() updateBookDto: updateBookDto,
   ): Promise<Book> {
-    return this.bookService.updateBookById(id, book);
+    return this.bookService.updateBookById(id, updateBookDto);
   }
 }
