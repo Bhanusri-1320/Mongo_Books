@@ -10,6 +10,7 @@ import {
 } from 'class-validator';
 import { AutoMap } from '@automapper/classes';
 import { User } from 'src/auth/schemas/user.schema';
+import { GetUser } from 'src/auth/get-user.desorator';
 
 export class createBookDto {
   @ApiProperty()

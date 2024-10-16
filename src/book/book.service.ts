@@ -27,13 +27,13 @@ export class BookService {
     private bookModel: mongoose.Model<Book>,
     private schedulerRegistry: SchedulerRegistry,
   ) {}
-
-  private readonly logger = new Logger(BookService.name);
+  // info, error, warning
+  private readonly logger = new Logger(BookService.name); // if we don't provide the bookserive.name it will don't mention it in the console
 
   // @Cron('10 * * * * *', {
   //   name: 'notification',
   //   timeZone: 'Asia/Kolkata',
-  //   disabled: false,
+  //   disabled: true, // true--> not print , false--> will execute
   // })
   // triggerNotifications() {
   //   console.log('you have a notification !!');
@@ -42,7 +42,7 @@ export class BookService {
   // handleCron() {
   //   this.logger.debug('Called every 30 seconds');
   // }
-  // @Timeout(20000)
+  // // @Timeout(20000)
   // handleTimeout() {
   //   this.logger.debug('Called once after 20 seconds');
   //   const job = this.schedulerRegistry.getCronJob('notifications');
@@ -53,7 +53,6 @@ export class BookService {
   // handleInterval() {
   //   console.log('Interval job running every 5 seconds');
   // }
-
   // @Cron('4 * * * * *', {
   //   name: 'notifications',
   //   timeZone: 'Europe/Paris',
@@ -172,17 +171,20 @@ export class BookService {
   async createBook(createBookdto: createBookDto, user: User): Promise<Book> {
     // without any mapper
     const { title, description, author, category, price } = createBookdto;
-    const res = await this.bookModel.create({
-      title,
-      description,
-      price,
-      author,
-      category,
-      user,
-    });
-    return res;
+    // const res = await this.bookModel.create({
+    //   title,
+    //   description,
+    //   price,
+    //   author,
+    //   category,
+    //   user,
+    // });
+    // return res;
     // without auto mapper
-    // const book = BookMapper.createMapper(createBookDto,user);
+    const book = BookMapper.createMapper(createBookdto);
+    console.log(book);
+    const res = await this.bookModel.create({ ...book, user });
+    return res;
     // return book;
     // with auto mapper
     // const book = mapper.map(createBookdto, Book, createBookDto);
@@ -190,7 +192,6 @@ export class BookService {
   }
 
   async deleteBook(id: string) {
-    console.log(id);
     return await this.bookModel.findByIdAndDelete(id);
   }
   async getBookById(id: string): Promise<Book> {

@@ -16,7 +16,7 @@ export enum Category {
   timestamps: true, // enables automatic createdAt updateAt time stamps
 })
 export class Book {
-  @Prop()
+  @Prop() // can add validations and defining a property in schema
   @AutoMap()
   title: string;
 
@@ -41,4 +41,4 @@ export class Book {
   user: mongoose.Schema.Types.ObjectId;
 }
 
-export const BookSchema = SchemaFactory.createForClass(Book);
+export const BookSchema = SchemaFactory.createForClass(Book); // Automatically generating a Mongoose schema based on your class definition.

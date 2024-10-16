@@ -3,7 +3,7 @@ import { createBookDto } from './dto/create-book.dto';
 import { Book } from './schemas/book.schema';
 
 export class BookMapper {
-  static createMapper(createBookDto: createBookDto, user: User): Book {
+  static createMapper(createBookDto: createBookDto): Book {
     const book = new Book();
     book.title = createBookDto.title;
     book.description = createBookDto.description;

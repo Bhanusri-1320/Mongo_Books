@@ -15,10 +15,11 @@ export class AuthController {
     return this.authService.signup(userCredentials);
   }
 
+  @ApiTags('signin')
   @Post('signin')
   singin(
     @Body() userCredentialsDto: UserCredentialsDto,
-  ) : Promise<{ accessToken: string }> {
+  ): Promise<{ accessToken: string }> {
     console.log(userCredentialsDto);
     return this.authService.signin(userCredentialsDto);
   }
