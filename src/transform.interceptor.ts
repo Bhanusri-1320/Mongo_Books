@@ -22,24 +22,54 @@ export class TransformInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap(() => console.log(`After... ${Date.now() - now}ms`)),
       map((data) => data),
+      // map((data) => {
+      //   let array = [];
+      //   data.map((obj, i) => {
+      //     const { __v, title, ...newobject } = obj;
+      //     console.log(obj.__v);
+      //     array.push(newobject);
+      //   });
+      //   // for (let i; i < data.length; i++) {
+      //   //   console.log(`index of ${i} with data[i]`);
+      //   // }
+      //   // console.log(data[0].__v);
+      //   // console.log(array);
+      //   // console.log('data', data);
+      //   return array;
+      // }),
       map((data) => {
         let array = [];
-        data.map((obj, i) => {
-          // console.log(`index of ${i} with obj ${obj}`);
-          // const { __v, title, ...newobject } = obj;
-          // console.log('❌', newobject._doc);
-          // array.push(newobject._doc);
-          
+        data.map((obj) => {
+          let ob;
+          ob = modify(obj);
+          array.push(ob);
         });
-        // for (let i; i < data.length; i++) {
-        //   console.log(`index of ${i} with data[i]`);
-        // }
-        // console.log(data[0].__v);
-        // console.log(array);
-        // console.log('data', data);
         return array;
       }),
     );
+
+    function modify(obj) {
+      const {
+        title,
+        description,
+        author,
+        price,
+        user,
+        createdAt,
+        updatedAt,
+        _id,
+      } = obj;
+      return {
+        title,
+        description,
+        author,
+        price,
+        user,
+        createdAt,
+        updatedAt,
+        _id,
+      };
+    }
   }
 }
 
