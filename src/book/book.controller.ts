@@ -11,6 +11,7 @@ import {
   Put,
   Res,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { BookService } from './book.service';
 import { Book } from './schemas/book.schema';
@@ -27,10 +28,12 @@ import { SchedulerRegistry } from '@nestjs/schedule';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/auth/get-user.desorator';
 import { User } from 'src/auth/schemas/user.schema';
+import { TransformInterceptor } from 'src/transform.interceptor';
 
 @ApiTags('book')
 @UseGuards(AuthGuard('jwt'))
 @Controller('book')
+// @UseInterceptors(TransformInterceptor)
 export class BookController {
   constructor(
     private bookService: BookService,

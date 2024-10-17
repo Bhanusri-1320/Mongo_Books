@@ -11,6 +11,7 @@ import {
 import { AutoMap } from '@automapper/classes';
 import { User } from 'src/auth/schemas/user.schema';
 import { GetUser } from 'src/auth/get-user.desorator';
+import { Expose } from 'class-transformer';
 
 export class createBookDto {
   @ApiProperty()
@@ -19,6 +20,7 @@ export class createBookDto {
   @MaxLength(30)
   @IsString()
   @AutoMap()
+  @Expose()
   readonly title: string;
   @ApiProperty()
   @MinLength(3)
@@ -26,6 +28,7 @@ export class createBookDto {
   @MaxLength(30)
   @IsString()
   @AutoMap()
+  @Expose()
   readonly description: string;
   @ApiProperty()
   @MinLength(3)
@@ -33,11 +36,13 @@ export class createBookDto {
   @MaxLength(30)
   @IsString()
   @AutoMap()
+  @Expose()
   readonly author: string;
   @ApiProperty()
   @IsNotEmpty()
   @IsNumber()
   @AutoMap()
+  @Expose()
   readonly price: number;
   @ApiProperty()
   @MinLength(3)
@@ -45,8 +50,10 @@ export class createBookDto {
   @MaxLength(30)
   @IsString()
   @AutoMap()
+  @Expose()
   readonly category: Category;
 
   @AutoMap()
+  @Expose()
   user: User;
 }
