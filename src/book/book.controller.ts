@@ -27,9 +27,9 @@ import {
 } from '@nestjs/swagger';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { AuthGuard } from '@nestjs/passport';
-import { GetUser } from 'src/auth/get-user.desorator';
-import { User } from 'src/auth/schemas/user.schema';
-import { TransformInterceptor } from 'src/transform.interceptor';
+import { GetUser } from '.././auth/get-user.desorator';
+import { User } from '.././auth/schemas/user.schema';
+import { TransformInterceptor } from '../transform.interceptor';
 
 @ApiTags('book')
 @UseGuards(AuthGuard('jwt'))

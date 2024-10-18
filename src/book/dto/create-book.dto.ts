@@ -9,8 +9,8 @@ import {
   MinLength,
 } from 'class-validator';
 import { AutoMap } from '@automapper/classes';
-import { User } from 'src/auth/schemas/user.schema';
-import { GetUser } from 'src/auth/get-user.desorator';
+import { User } from '../../auth/schemas/user.schema';
+import { GetUser } from '../../auth/get-user.desorator';
 import { Expose } from 'class-transformer';
 
 export class createBookDto {
