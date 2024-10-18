@@ -24,7 +24,6 @@ export class AuthService {
   async signup(userCredentialsDto: UserCredentialsDto): Promise<User> {
     const { username, password } = userCredentialsDto;
     const found = await this.userModel.findOne({ username });
-    console.log(found);
     if (!found) {
       const salt = await bcrypt.genSalt();
       const hashedpassword = await bcrypt.hash(password, salt);

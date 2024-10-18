@@ -23,6 +23,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { AuthGuard } from '@nestjs/passport';
@@ -33,7 +34,6 @@ import { TransformInterceptor } from 'src/transform.interceptor';
 @ApiTags('book')
 @UseGuards(AuthGuard('jwt'))
 @Controller('book')
-// @UseInterceptors(TransformInterceptor)
 export class BookController {
   constructor(
     private bookService: BookService,
@@ -103,55 +103,94 @@ export class BookController {
   @ApiOperation({ summary: 'Get all books' })
   @ApiResponse({ status: 200, description: 'Book found' })
   @ApiResponse({ status: 404, description: 'Book not found' })
+  @UseInterceptors(TransformInterceptor)
   async findAll(@GetUser() user: User): Promise<Book[]> {
     return await this.bookService.findAll(user);
   }
 
   @Get('download/:id')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Download book by id in Excel Format' })
+  // async generateExcelWithId(@Param('id') id: string, @Res() res: Response) {
+  //   try {
+  //     const book = await this.bookService.getBookById(id);
+  //     console.log('Books retrieved for Excel:', book);
+  //     if (!book) {
+  //       return res.status(404).send('Book not found');
+  //     }
+
+  //     const excelBuffer = await this.bookService.generateExcelWithId(book);
+
+  //     res.set({
+  //       'Content-Type': process.env.EXCEL_CONTENT_TYPE,
+  //       'Content-Disposition': process.env.EXCEL_CONTENT_DISPOSITION,
+  //     });
+
+  //     res.send(excelBuffer);
+  //   } catch (error) {
+  //     console.error('Error downloading PDF:', error);
+  //     res.status(500).send('Failed to generate PDF');
+  //   }
+  // }
   async generateExcelWithId(@Param('id') id: string, @Res() res: Response) {
     try {
-      const book = await this.bookService.getBookById(id);
-      console.log('Books retrieved for PDF:', book);
+      const book = await this.getBookById(id);
       if (!book) {
-        return res.status(404).send('Book not found');
+        res.status(404).send(`book with id ${id} is not found!`);
+      } else {
+        const excelBuffer = this.bookService.generateExcelWithId(book);
+        res.set({
+          'Content-Type': process.env.EXCEL_CONTENT_TYPE,
+          'Content-Disposition': process.env.EXCEL_CONTENT_DISPOSITION,
+        });
+        res.status(200).send(excelBuffer);
       }
-
-      const excelBuffer = await this.bookService.generateExcelWithId(book);
-
-      res.set({
-        'Content-Type': process.env.EXCEL_CONTENT_TYPE,
-        'Content-Disposition': process.env.EXCEL_CONTENT_DISPOSITION,
-      });
-
-      res.send(excelBuffer);
-    } catch (error) {
-      console.error('Error downloading PDF:', error);
-      res.status(500).send('Failed to generate PDF');
+    } catch (err) {
+      console.log('error dowloading : ', err);
+      res.status(500).send('Failed to generate');
     }
   }
 
   @Get('download')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Download All books in PDF Format' })
+  // async generateAllBooksPDF(@Res() res: Response, @GetUser() user: User) {
+  //   try {
+  //     const books = await this.bookService.findAll(user);
+  //     console.log('Books retrieved for PDF:', books);
+  //     if (!books.length) {
+  //       return res.status(404).send('No books found.');
+  //     }
+
+  //     const pdfBuffer = await this.bookService.generateAllBooksPDF(books);
+
+  //     res.set({
+  //       'Content-Type': process.env.PDF_CONTENT_TYPE,
+  //       'Content-Disposition': process.env.PDF_CONTENT_DISPOSITION,
+  //     });
+
+  //     res.send(pdfBuffer);
+  //   } catch (error) {
+  //     console.error('Error downloading PDF:', error);
+  //     res.status(500).send('Failed to generate PDF');
+  //   }
+  // }
   async generateAllBooksPDF(@Res() res: Response, @GetUser() user: User) {
     try {
-      const books = await this.bookService.findAll(user);
-      console.log('Books retrieved for PDF:', books);
+      const books = await this.findAll(user);
       if (!books.length) {
-        return res.status(404).send('No books found.');
+        res.status(401).send(`no books found`);
+      } else {
+        const pdfBuffer = await this.bookService.generateAllBooksPDF(books);
+        res.set({
+          'Content-Type': process.env.PDF_CONTENT_TYPE,
+          'Content-Disposition': process.env.PDF_CONTENT_DISPOSITION,
+        });
+        res.status(200).send(pdfBuffer);
       }
-
-      const pdfBuffer = await this.bookService.generateAllBooksPDF(books);
-
-      res.set({
-        'Content-Type': process.env.PDF_CONTENT_TYPE,
-        'Content-Disposition': process.env.PDF_CONTENT_DISPOSITION,
-      });
-
-      res.send(pdfBuffer);
-    } catch (error) {
-      console.error('Error downloading PDF:', error);
-      res.status(500).send('Failed to generate PDF');
+    } catch (err) {
+      console.log('error dowliding PDF', err);
+      res.status(500).send('Failed to generate ');
     }
   }
 
@@ -181,7 +220,6 @@ export class BookController {
   @ApiResponse({ status: 200, description: 'Book deleted' })
   @ApiResponse({ status: 404, description: 'Book not found' })
   async deleteBook(@Param('id') id: string) {
-    console.log(id);
     return await this.bookService.deleteBook(id);
   }
   @Put(':id')

@@ -82,3 +82,27 @@ app.useGlobalInterceptors(new TransformInterceptor());
     - to iterate through the value
   - ### Observable:
     - Observables are lazy, meaning they don’t do anything until you subscribe to them
+
+# Generating Excel download:
+
+- for excel we need to download ExcelJS
+- 1. need to create a workbook ( const workbook = new ExcelJS.Workbook();)
+
+- 2. then need to create a worksheet in that workbook (const worksheet = workbook.addWorksheet('Book');)
+
+- 3. then create columns( const headers = JSON.parse(process.env.EXCEL_HEADERS);
+
+  worksheet.columns = Object.keys(headers).map((key) => ({
+  header: headers[key],
+  key,
+  }));)
+
+- 4. add rows worksheet.addRow({
+     title: book.title,
+     description: book.description,
+     author: book.author,
+     price: book.price,
+     category: book.category,
+     });
+- 5. then wrtite into one buffer and return it, why coz if we write it into buffer that will write in the memory not in the harddisk so the it is easy to download to store temporarly ( const buffer = await workbook.xlsx.writeBuffer();
+     return buffer;)

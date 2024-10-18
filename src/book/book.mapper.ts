@@ -9,6 +9,7 @@ export class BookMapper {
     book.description = createBookDto.description;
     book.price = createBookDto.price;
     book.author = createBookDto.author;
+    book.category = createBookDto.category;
     return book;
   }
 }

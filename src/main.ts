@@ -12,7 +12,7 @@ import { ErrorsInterceptor } from './errors.interceptor';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
-  app.useGlobalInterceptors(new TransformInterceptor());
+  // app.useGlobalInterceptors(new TransformInterceptor());
   app.useGlobalInterceptors(new ErrorsInterceptor());
   const config = new DocumentBuilder()
     .setDescription(process.env.SWAGGER_DESCRIPTION)

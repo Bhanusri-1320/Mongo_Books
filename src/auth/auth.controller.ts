@@ -20,7 +20,6 @@ export class AuthController {
   singin(
     @Body() userCredentialsDto: UserCredentialsDto,
   ): Promise<{ accessToken: string }> {
-    console.log(userCredentialsDto);
     return this.authService.signin(userCredentialsDto);
   }
 }

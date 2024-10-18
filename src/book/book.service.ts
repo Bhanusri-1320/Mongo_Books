@@ -3,7 +3,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
-import { Book } from './schemas/book.schema';
+import { Book, Category } from './schemas/book.schema';
 import * as PDFDocument from 'pdfkit';
 import * as ExcelJS from 'exceljs';
 import {
@@ -19,6 +19,7 @@ import { updateBookDto } from './dto/update-book.dto';
 import { BookMapper } from './book.mapper';
 import { mapper } from './mappers/mapper';
 import { User } from 'src/auth/schemas/user.schema';
+import { title } from 'process';
 
 @Injectable()
 export class BookService {
@@ -165,6 +166,7 @@ export class BookService {
 
   async findAll(user: User): Promise<Book[]> {
     const books = await this.bookModel.find({ user }); //  When called without any arguments, this.bookModel.find() fetches all documents in the books collection.
+    console.log(books);
     return books;
   }
 
@@ -184,6 +186,7 @@ export class BookService {
     const book = BookMapper.createMapper(createBookdto);
     console.log(book);
     const res = await this.bookModel.create({ ...book, user });
+    console.log(res);
     return res;
     // return book;
     // with auto mapper
@@ -236,25 +239,21 @@ export class BookService {
   }
 
   async generateExcelWithId(book: Book) {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Book');
+    const workBook = new ExcelJS.Workbook();
+    const worksheet = workBook.addWorksheet('Book');
     const headers = JSON.parse(process.env.EXCEL_HEADERS);
-
     worksheet.columns = Object.keys(headers).map((key) => ({
       header: headers[key],
       key,
     }));
-
-    // adding rows
     worksheet.addRow({
       title: book.title,
       description: book.description,
       author: book.author,
       price: book.price,
-      category: book.category,
+      Category: book.category,
     });
-
-    const buffer = await workbook.xlsx.writeBuffer();
+    const buffer = await workBook.xlsx.writeBuffer();
     return buffer;
   }
 }

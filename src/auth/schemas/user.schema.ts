@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import { Book } from 'src/book/schemas/book.schema';
 
 @Schema({
-  timestamps: true,
+  // timestamps: true,
 })
 export class User {
   @Prop()

@@ -13,7 +13,7 @@ export enum Category {
 }
 
 @Schema({
-  timestamps: true, // enables automatic createdAt updateAt time stamps
+  // timestamps: true, // enables automatic createdAt updateAt time stamps
 })
 export class Book {
   @Prop() // can add validations and defining a property in schema
